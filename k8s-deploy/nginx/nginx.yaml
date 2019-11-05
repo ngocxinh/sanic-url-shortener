@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sanic-nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+      tier: frontend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+        tier: frontend
+    spec:
+      containers:
+        - name: sanic-nginx-con
+          image: namptit307/sanic_nginx
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sanic-nginx
+spec:
+  selector:
+    app: nginx
+    tier: frontend
+  type: NodePort
+  ports:
+    - name: sanic-nginx-port
+      protocol: TCP
+      port: 80
+      nodePort: 30300

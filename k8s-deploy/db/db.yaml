@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sanic-db
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+      tier: db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+        tier: db
+    spec:
+      containers:
+        - name: sanic-db-con
+          image: namptit307/sanic_db
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: datasanic
+              mountPath: /var/lib/postgresql/data
+              readOnly: false
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: POSTGRES_PASSWORD
+      volumes:
+        - name: datasanic
+          persistentVolumeClaim:
+            claimName: db-sanic-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sanic-db
+spec:
+  selector:
+    app: postgres
+    tier: db
+  ports:
+    - name: sanic-db-port
+      protocol: TCP
+      port: 5432
+      targetPort: 5432

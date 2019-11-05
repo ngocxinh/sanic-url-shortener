@@ -1,0 +1,64 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sanic-app
+spec:
+  selector:
+    matchLabels:
+      app: sanic
+      tier: backend
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: sanic
+        tier: backend
+    spec:
+      containers:
+        - name: sanic-app-con
+          image: namptit307/sanic_url
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: POSTGRES_HOST
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+spec:
+  selector:
+    app: sanic
+    tier: backend
+  ports:
+    - name: sanic-app-port
+      protocol: TCP
+      port: 8000
+      targetPort: 8000

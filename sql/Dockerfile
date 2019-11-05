@@ -6,6 +6,6 @@ ENV POSTGRES_DB 'redirects'
 
 ADD schema.sql /docker-entrypoint-initdb.d/schema.sql
 
-VOLUME /tmp/pg /var/lib/postgres/data
+VOLUME /var/lib/postgresql/data
 
 EXPOSE 5432
