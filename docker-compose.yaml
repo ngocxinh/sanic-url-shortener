@@ -1,4 +1,4 @@
-version: '2'
+version: '3.5'
 services:
     nginx:
         build:
@@ -9,6 +9,9 @@ services:
             - "8888:80"
         links:
             - app
+        networks:
+          - sanic-net
+
     app:
         build:
           context: ./app
@@ -22,6 +25,8 @@ services:
             - ./.env
         depends_on:
             - postgres
+        networks:
+          - sanic-net
     postgres:
         build:
           context: ./sql
@@ -29,7 +34,15 @@ services:
         container_name: sanic_db_con
         env_file:
             - ./.env
-        # volumes:
-        #     - ./pg:/var/lib/postgres/data/
+        volumes:
+            - sanic-data:/var/lib/postgres/data
         expose:
             - "5432"
+        networks:
+          - sanic-net
+networks:
+  sanic-net:
+    name: sanic-network
+volumes:
+  sanic-data:
+    name: sanic-db
